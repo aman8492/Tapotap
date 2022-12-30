@@ -39,6 +39,7 @@ STATE_CHOICES = (
   ('Uttar Pradesh','Uttar Pradesh'),
   ('West Bengal','West Bengal'),
 )
+
 class Customer(models.Model):
  user = models.ForeignKey(User, on_delete=models.CASCADE)
  name = models.CharField(max_length=200)
@@ -136,9 +137,23 @@ class OrderPlaced(models.Model):
  ordered_date = models.DateTimeField(auto_now_add=True)
  couponapplied = models.CharField(max_length = 150, default = "None")
  status = models.CharField(max_length=50,choices=STATUS_CHOICES,default='Pending')
- payment_screenshot = models.ImageField(upload_to='productimg')
+ payment_screenshot = models.ImageField()
+
+ class Meta:
+  verbose_name_plural = "Orders Placed"
 
   # Below Property will be used by orders.html page to show total cost
  @property
  def total_cost(self):
    return self.quantity * self.product.discounted_price
+
+
+class Ratings(models.Model):
+  user = models.ForeignKey(User, on_delete=models.CASCADE)
+  product = models.ForeignKey(Product, on_delete=models.CASCADE)
+  rating = models.CharField(max_length=500)
+
+  def __str__(self):
+      return self.rating
+  
+  

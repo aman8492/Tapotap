@@ -6,7 +6,8 @@ from .models import (
  Product,
  Cart,
  OrderPlaced, 
- Coupon
+ Coupon, 
+ Ratings
 )
 
 @admin.register(Customer)
@@ -38,3 +39,4 @@ class OrderPlacedModelAdmin(admin.ModelAdmin):
   link = reverse("admin:app_customer_change", args=[obj.customer.pk])
   return format_html('<a href="{}">{}</a>', link, obj.customer.name)
  
+admin.site.register(Ratings)

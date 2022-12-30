@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.contrib import messages
-from .models import Customer, Product, Cart, OrderPlaced, Coupon
-from .forms import CustomerRegistrationForm, CustomerProfileForm
+from .models import Customer, Product, Cart, OrderPlaced, Coupon, Ratings
+from .forms import CustomerRegistrationForm, CustomerProfileForm, RatingForm
 from django.views import View
 from django.http import JsonResponse, request
 from django.db.models import Q
@@ -23,14 +23,30 @@ class ProductView(View):
 
 class ProductDetailView(View):
 	def get(self, request, pk):
+		form = RatingForm
 		totalitem = 0
 		product = Product.objects.get(pk=pk)
+		ratings = Ratings.objects.filter(product = pk)
+		print(ratings)
 		print(product.id)
 		item_already_in_cart=False
 		if request.user.is_authenticated:
 			totalitem = len(Cart.objects.filter(user=request.user))
 			item_already_in_cart = Cart.objects.filter(Q(product=product.id) & Q(user=request.user)).exists()
-		return render(request, 'app/productdetail.html', {'product':product, 'item_already_in_cart':item_already_in_cart, 'totalitem':totalitem})
+		return render(request, 'app/productdetail.html', {'product':product, 'item_already_in_cart':item_already_in_cart, 'form': form, 'totalitem':totalitem, 'ratings': ratings})
+
+@method_decorator(login_required, name='dispatch')
+class SubmitRating(View):
+	def post(self, request, pk):			
+		form = RatingForm(request.POST)
+		if form.is_valid():
+			usr = request.user
+			product = Product.objects.get(pk=pk)
+			rating = form.cleaned_data['rating']
+			newrat = Ratings(user = usr, product = product, rating =rating)
+			newrat.save()
+			messages.success(request, "Review Submitted")
+			return redirect(f'/product-detail/{pk}')
 
 @login_required()
 def add_to_cart(request):
